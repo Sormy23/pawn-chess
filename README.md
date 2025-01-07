@@ -154,13 +154,3 @@ Stores the current state of the game.
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
-
----
-
-## 🧠 Acknowledgments
-
-Special thanks to **Yasin Sahin** and **Sven Oberwalder** for conceptualizing and designing the game mechanics of Bauernschach. Your passion for innovation is inspiring! 🎉
-
----
-
-Feel free to share feedback or suggestions for improvement. Have fun playing! ♟️
