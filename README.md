@@ -34,7 +34,7 @@
 │   ├── create_tables.sql       # SQL scripts to create the database schema
 │   ├── procedures.sql          # PL/SQL scripts for procedures
 │   ├── functions.sql           # PL/SQL scripts for functions
-│   └── setup.sql               # Script to initialize the database
+│   └── example_game.sql        # Example Gameplay
 ├── README.md                   # Project documentation
 ```
 
@@ -66,9 +66,8 @@ Stores the current state of the game.
 ### 1. **Setup the Database**
    - Run the SQL scripts in the following order:
      1. `create_tables.sql`
-     2. `procedures.sql`
-     3. `functions.sql`
-     4. `setup.sql`
+     2. `functions.sql`
+     3. `procedures.sql`
 
 ### 2. **Start the Game**
    - Use the `startGame` procedure to initialize the game.  
@@ -87,37 +86,11 @@ Stores the current state of the game.
          playTurn('A2', 'A3'); -- Move white pawn from A2 to A3
      END;
      ```
-
-### 4. **Check Win Condition**
-   - Use the `getEndCondition` function to see if the game has ended.  
-     Example:
-     ```sql
-     SELECT getEndCondition() FROM dual; -- Returns 'W', 'B', or NULL
-     ```
-
 ---
 
 ## 🔍 Example Gameplay
 
-1. Start the game in single-player mode with the player as white:
-   ```sql
-   BEGIN
-       startGame(FALSE, TRUE);
-   END;
-   ```
-
-2. Move pawns alternately:
-   ```sql
-   BEGIN
-       playTurn('A2', 'A3'); -- White moves
-       playTurn('A7', 'A6'); -- Black moves
-   END;
-   ```
-
-3. Check if a player has won:
-   ```sql
-   SELECT getEndCondition() FROM dual;
-   ```
+Example gameplay can be seen in the [example_game.sql](./sql/example_game.sql) file
 
 ---
 
