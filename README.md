@@ -2,6 +2,9 @@
 
 **Bauernschach** is a simplified chess variant played exclusively with pawns on an 8x8 chessboard. The goal of this project is to implement the game logic and structure in Oracle Database using SQL and PL/SQL. The implementation handles game initialization, movement, and win conditions while following chess rules for pawn movement, including **en passant** and promotion-like rules. This project is ideal for developers looking to explore database-driven game mechanics.
 
+## Developers
+Sven Oberwalder (@Sormy23), Yasin Sahin (@YassinoZoldyck)
+
 ---
 
 ## 🚀 Features
