@@ -87,6 +87,8 @@ CREATE OR REPLACE FUNCTION getEndCondition RETURN VARCHAR2 AS
     white_win BOOLEAN := FALSE;
     black_win BOOLEAN := FALSE;
     count_check INT;
+    currentPlayerColor CHAR(1);
+    doesPawnOfCurrentPlayerExist BOOLEAN := FALSE;
 BEGIN
     -- Check if white has won
     SELECT COUNT(*)
@@ -110,17 +112,63 @@ BEGIN
     ELSIF black_win THEN
         RETURN 'B';
     ELSE
-        -- Check for draw
-        SELECT COUNT(*)
-        INTO count_check
-        FROM board
-        WHERE 'W' IN (a, b, c, d, e, f, g, h) OR 'B' IN (a, b, c, d, e, f, g, h);
+        -- get the current player color from the table gameState and then iterate over every square of its color
+        -- if there is a square that can move, return NULL
+        -- if there is no square that can move, return 'D'
 
-        IF count_check = 0 THEN
+        SELECT color INTO currentPlayerColor FROM gameState WHERE hasTurn = TRUE;
+
+        FOR i IN 1..8 LOOP
+            FOR j IN ASCII('A')..ASCII('H') LOOP
+                IF (getSquare(CHR(j) || TO_CHAR(i)) = currentPlayerColor) THEN
+                    doesPawnOfCurrentPlayerExist := TRUE;
+                    IF (canPawnMove(CHR(j) || TO_CHAR(i))) THEN
+                        RETURN NULL;
+                    END IF;
+                END IF;
+            END LOOP;
+        END LOOP;
+
+        IF (doesPawnOfCurrentPlayerExist) THEN
             RETURN 'D';
         ELSE
-            RETURN NULL;
+            if (currentPlayerColor = 'W') then
+                RETURN 'B';
+            else
+                RETURN 'W';
+            end if;
         END IF;
     END IF;
 END;
 /
+
+create or replace function canPawnMove(square varchar2) return BOOLEAN as
+    square_line INT;
+    square_column varchar(1);
+    line_diff INT;
+BEGIN
+    square_line := TO_NUMBER(SUBSTR(square, 2, 1));
+    square_column := SUBSTR(square, 1, 1);
+    line_diff := 0;
+    if (getSquare(square) = 'W') then
+        line_diff := 1;
+    elsif (getSquare(square) = 'B') then
+        line_diff := -1;
+    ELSE
+        return FALSE;
+    end if;
+
+    for i in -1..1 loop
+        if (square_column = 'A' and i = -1) then
+            continue;
+        elsif (square_column = 'H' and i = 1) then
+            continue;
+        end if;
+        
+        if (canMovePawn(square, CHR(ASCII(square_column) + i) || TO_CHAR(square_line + line_diff))) then
+            return TRUE;
+        end if;
+    end loop;
+
+    return FALSE;
+end;

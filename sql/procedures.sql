@@ -100,21 +100,11 @@ CREATE OR REPLACE PROCEDURE playTurn(from_square VARCHAR2, to_square VARCHAR2) A
     from_column CHAR(1);
     to_column CHAR(1);
 BEGIN
-    IF getEndCondition IS NOT NULL THEN
-        DBMS_OUTPUT.PUT_LINE(' _______  _______  _______  _______           _______  _______  _______  _        _______ ');
-        DBMS_OUTPUT.PUT_LINE('(  ___  )(  ___  )(  ____ \(  ____ \|\     /|(  ____ )(  ___  )(  ____ \( \      (  ____ \');
-        DBMS_OUTPUT.PUT_LINE('| (   ) || (   ) || (    \/| (    \/| )   ( || (    )|| (   ) || (    \/| (      | (    \/');
-        DBMS_OUTPUT.PUT_LINE('| |   | || (___) || (_____ | |      | (___) || (____)|| (___) || |      | |      | (__    ');
-        DBMS_OUTPUT.PUT_LINE('| |   | ||  ___  |(_____  )| |      |  ___  ||     __)|  ___  || |      | |      |  __)   ');
-        DBMS_OUTPUT.PUT_LINE('| |   | || (   ) |      ) || |      | (   ) || (\ (   | (   ) || |      | |      | (      ');
-        DBMS_OUTPUT.PUT_LINE('| (___) || )   ( |/\____) || (____/\| )   ( || ) \ \__| )   ( || (____/\| (____/\| (____/\');
-        DBMS_OUTPUT.PUT_LINE('(_______)|/     \|\_______)(_______/|/     \||/   \__/|/     \|(_______/(_______/(_______/');
-
-        DBMS_OUTPUT.PUT_LINE('#######################################################');
-        DBMS_OUTPUT.PUT_LINE('Gewinner: ' || getEndCondition);
-        DBMS_OUTPUT.PUT_LINE('#######################################################');
-        RETURN;
+    if getEndCondition IS NOT NULL THEN
+        outputWinningConditionToTerminal;
+        return;
     END IF;
+    
 
 
     from_line := TO_NUMBER(SUBSTR(from_square, 2, 1));
@@ -145,6 +135,21 @@ BEGIN
     EXECUTE IMMEDIATE 'UPDATE board SET ' || from_column || ' = '' '' WHERE line = :1'
         USING from_line;
 
+    MANAGEENPASSANT(from_square, to_square);
+
+    UPDATE gameState SET hasTurn = NOT hasTurn WHERE color = current_turn;
+    UPDATE gameState SET hasTurn = TRUE WHERE color != current_turn;
+
+    if getEndCondition IS NOT NULL THEN
+        outputWinningConditionToTerminal;
+    END IF;
+    
+END;
+/
+
+
+CREATE OR REPLACE PROCEDURE outputWinningConditionToTerminal AS
+begin
     IF getEndCondition IS NOT NULL THEN
         DBMS_OUTPUT.PUT_LINE(' _______  _______  _______  _______           _______  _______  _______  _        _______ ');
         DBMS_OUTPUT.PUT_LINE('(  ___  )(  ___  )(  ____ \(  ____ \|\     /|(  ____ )(  ___  )(  ____ \( \      (  ____ \');
@@ -155,21 +160,31 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('| (___) || )   ( |/\____) || (____/\| )   ( || ) \ \__| )   ( || (____/\| (____/\| (____/\');
         DBMS_OUTPUT.PUT_LINE('(_______)|/     \|\_______)(_______/|/     \||/   \__/|/     \|(_______/(_______/(_______/');
 
-        DBMS_OUTPUT.PUT_LINE('#######################################################');
-        DBMS_OUTPUT.PUT_LINE('Gewinner: ' || getEndCondition);
-        DBMS_OUTPUT.PUT_LINE('#######################################################');
-        RETURN;
+        if getEndCondition = 'W' then
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+            DBMS_OUTPUT.PUT_LINE(' __     __   __  __   __   ______  ______       __     __   __   __   __   ______   ');
+            DBMS_OUTPUT.PUT_LINE('/\ \  _ \ \ /\ \_\ \ /\ \ /\__  _\/\  ___\     /\ \  _ \ \ /\ \ /\ "-.\ \ /\  ___\  ');
+            DBMS_OUTPUT.PUT_LINE('\ \ \/ ".\ \\ \  __ \\ \ \\/_/\ \/\ \  __\     \ \ \/ ".\ \\ \ \\ \ \-.  \\ \___  \ ');
+            DBMS_OUTPUT.PUT_LINE(' \ \__/".~\_\\ \_\ \_\\ \_\  \ \_\ \ \_____\    \ \__/".~\_\\ \_\\ \_\\"\_\\/\_____\');
+            DBMS_OUTPUT.PUT_LINE('  \/_/   \/_/ \/_/\/_/ \/_/   \/_/  \/_____/     \/_/   \/_/ \/_/ \/_/ \/_/ \/_____/');
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+        elsif getEndCondition = 'B' then
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+            DBMS_OUTPUT.PUT_LINE(' ______   __       ______   ______   __  __       __     __   __   __   __   ______   ');
+            DBMS_OUTPUT.PUT_LINE('/\  == \ /\ \     /\  __ \ /\  ___\ /\ \/ /      /\ \  _ \ \ /\ \ /\ "-.\ \ /\  ___\  ');
+            DBMS_OUTPUT.PUT_LINE('\ \  __< \ \ \____\ \  __ \\ \ \____\ \  _"-.    \ \ \/ ".\ \\ \ \\ \ \-.  \\ \___  \ ');
+            DBMS_OUTPUT.PUT_LINE(' \ \_____\\ \_____\\ \_\ \_\\ \_____\\ \_\ \_\    \ \__/".~\_\\ \_\\ \_\\"\_\\/\_____\');
+            DBMS_OUTPUT.PUT_LINE('  \/_____/ \/_____/ \/_/\/_/ \/_____/ \/_/\/_/     \/_/   \/_/ \/_/ \/_/ \/_/ \/_____/');
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+        else
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+            DBMS_OUTPUT.PUT_LINE(' _____     ______     ______     __     __   '); 
+            DBMS_OUTPUT.PUT_LINE('/\  __-.  /\  == \   /\  __ \   /\ \  _ \ \  '); 
+            DBMS_OUTPUT.PUT_LINE('\ \ \/\ \ \ \  __<   \ \  __ \  \ \ \/ ".\ \ '); 
+            DBMS_OUTPUT.PUT_LINE(' \ \____-  \ \_\ \_\  \ \_\ \_\  \ \__/".~\_\'); 
+            DBMS_OUTPUT.PUT_LINE('  \/____/   \/_/ /_/   \/_/\/_/   \/_/   \/_/'); 
+            DBMS_OUTPUT.PUT_LINE('#######################################################');
+        end if;
     END IF;
-
-    MANAGEENPASSANT(from_square, to_square);
-
-    UPDATE gameState SET hasTurn = NOT hasTurn WHERE color = current_turn;
-    UPDATE gameState SET hasTurn = TRUE WHERE color != current_turn;
-END;
+end;
 /
-
-
-
-
-                                                                                          
-
